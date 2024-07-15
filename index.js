@@ -100,11 +100,24 @@ function checkNewEmails(auth) {
                 const msg = res.data;
                 var url =
                   msg.snippet &&
-                  `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=593981143&text=${msg.snippet}`;
-                var url2 =  msg.snippet && `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=466616096&text=${msg.snippet}`;
+                  `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=593981143&text=${
+                    msg.snippet +
+                    "\n" +
+                    "*Current Time: *" +
+                    new Date().toLocaleTimeString()
+                  }`;
+                var url2 =
+                  msg.snippet &&
+                  `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=466616096&text=${
+                    msg.snippet +
+                    "\n" +
+                    "*Current Time: *" +
+                    new Date().toLocaleTimeString()
+                  }`;
                 console.log(`- ${msg.snippet}`);
+                await axios.post(url);
                 await axios.post(url2);
-                // await markAsRead(auth, messages[0].id);
+                await markAsRead(auth, messages[0].id);
               }
             }
           );
