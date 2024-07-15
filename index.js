@@ -3,11 +3,14 @@ const readline = require("readline");
 const { google } = require("googleapis");
 const { default: axios } = require("axios");
 // Якщо ви зміните ці SCOPES, видаліть файл token.json.
-const SCOPES = ["https://www.googleapis.com/auth/gmail.modify"];
+const SCOPES = [
+  "https://www.googleapis.com/auth/gmail.modify",
+  "https://www.googleapis.com/auth/gmail.readonly",
+];
 
 const TOKEN_PATH = "token.json";
 
-const token = require("./token.json");
+// const token = require("./token.json")
 // Завантажте секрет клієнта з локального файлу.
 fs.readFile("credentials.json", (err, content) => {
   if (err)
@@ -87,7 +90,7 @@ function checkNewEmails(auth) {
       (err, res) => {
         if (err) return console.log("API повернув помилку: " + err);
         const messages = res.data.messages;
-        if (messages && messages.length && messages[0].id) {
+        if (messages && messages.length) {
           console.log("Знайдено нові листи:");
           gmail.users.messages.get(
             {
@@ -115,9 +118,10 @@ function checkNewEmails(auth) {
                     new Date().toLocaleTimeString()
                   }`;
                 console.log(`- ${msg.snippet}`);
-                await axios.post(url);
-                await axios.post(url2);
-                await markAsRead(auth, messages[0].id);
+                await markMessageAsRead(auth, messages[0].id).then(async () => {
+                  await axios.post(url);
+                  await axios.post(url2);
+                });
               }
             }
           );
@@ -128,23 +132,22 @@ function checkNewEmails(auth) {
     );
   }, 1000); // Перевіряти кожні 10 секунд
 }
-async function markAsRead(auth, messageId) {
+async function markMessageAsRead(auth, messageId) {
+  const gmail = google.gmail({ version: "v1", auth });
+
   try {
-    const url = `https://gmail.googleapis.com/gmail/v1/users/me/messages/${messageId}/modify`;
-    await axios.post(
-      url,
-      {
-        removeLabelIds: ["UNREAD"],
+    const response = gmail.users.messages.modify({
+      userId: "me",
+      id: messageId,
+      resource: {
+        removeLabelIds: ["UNREAD"], // Note: Label IDs are case-sensitive
       },
-      {
-        headers: {
-          Authorization: `Bearer ${token.access_token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    console.log(`Message ${messageId} marked as read`);
-  } catch (err) {
-    console.error("Error marking message as read:", err);
+    });
+
+    console.log("Message marked as read:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error marking message as read:", error.message);
+    throw error;
   }
 }
