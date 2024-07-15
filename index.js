@@ -126,7 +126,7 @@ function checkNewEmails(auth) {
         }
       }
     );
-  }, 10000); // Перевіряти кожні 10 секунд
+  }, 1000); // Перевіряти кожні 10 секунд
 }
 async function markAsRead(auth, messageId) {
   try {
