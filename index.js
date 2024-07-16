@@ -141,7 +141,11 @@ function checkNewEmails(auth) {
                         parse_mode: "HTML",
                       },
                     }));
-                  // await axios.post(url2);
+                   await axios.post(url2, {
+                      data: {
+                        parse_mode: "HTML",
+                      },
+                    }));
                 });
               }
             }
