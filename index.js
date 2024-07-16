@@ -90,6 +90,7 @@ function checkNewEmails(auth) {
       (err, res) => {
         if (err) return console.log("API повернув помилку: " + err);
         const messages = res.data.messages;
+
         if (messages && messages.length) {
           console.log("Знайдено нові листи:");
           gmail.users.messages.get(
@@ -101,26 +102,46 @@ function checkNewEmails(auth) {
               if (err) return console.log("API повернув помилку: " + err);
               else if (res.data) {
                 const msg = res.data;
+                const text = msg.snippet;
+                const title = res.data.payload.headers?.find((info) =>
+                  info.name.includes("Subject")
+                ).value;
+                const isSendMessage =
+                  msg.payload.headers
+                    ?.find((info) => info.name.includes("From"))
+                    .value.includes("do-not-reply@mail.investors.com") &&
+                  text.length > 0 &&
+                  [
+                    "joins",
+                    "increasing",
+                    "raised",
+                    "adding",
+                    "moves to",
+                    "Moves To",
+                    "rejoins",
+                  ].some((word) =>
+                    title.toLowerCase().includes(word.toLowerCase())
+                  );
+
+                const currentTime =
+                  "<b><u>Current time</u>: </b>" + new Date().toTimeString();
+
+                const customMessage = `Title: ${title}%0A${currentTime}`;
+
                 var url =
                   msg.snippet &&
-                  `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=593981143&text=${
-                    msg.snippet +
-                    "\n" +
-                    "*Current Time: *" +
-                    new Date().toLocaleTimeString()
-                  }`;
+                  `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=593981143&text=${customMessage}&parse_mode=HTML`;
                 var url2 =
                   msg.snippet &&
-                  `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=466616096&text=${
-                    msg.snippet +
-                    "\n" +
-                    "*Current Time: *" +
-                    new Date().toLocaleTimeString()
-                  }`;
-                console.log(`- ${msg.snippet}`);
+                  `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=466616096&text=${customMessage}`;
                 await markMessageAsRead(auth, messages[0].id).then(async () => {
-                  await axios.post(url);
-                  await axios.post(url2);
+                  isSendMessage &&
+                    (await axios.post(url, {
+                      data: {
+                        parse_mode: "HTML",
+                      },
+                    }));
+                  // await axios.post(url2);
                 });
               }
             }
