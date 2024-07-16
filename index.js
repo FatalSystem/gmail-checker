@@ -134,20 +134,22 @@ function checkNewEmails(auth) {
                 var url2 =
                   msg.snippet &&
                   `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=466616096&text=${customMessage}`;
-                await markMessageAsRead(auth, messages[0].id).then(async () => {
-                  if(isSendMessage){  
-                    (await axios.post(url, {
-                      data: {
-                        parse_mode: "HTML",
-                      },
-                    }));
-                   await axios.post(url2, {
-                    data: {
-                      parse_mode: "HTML",
-                    },
-                  });
-                  }
-                });
+                if (isSendMessage) {
+                  await markMessageAsRead(auth, messages[0].id).then(
+                    async () => {
+                      await axios.post(url, {
+                        data: {
+                          parse_mode: "HTML",
+                        },
+                      });
+                      await axios.post(url2, {
+                        data: {
+                          parse_mode: "HTML",
+                        },
+                      });
+                    }
+                  );
+                }
               }
             }
           );
