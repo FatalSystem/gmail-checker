@@ -1,4 +1,3 @@
-
 const fs = require("fs");
 const readline = require("readline");
 const { google } = require("googleapis");
@@ -110,15 +109,13 @@ function checkNewEmails(auth) {
                 const isSendMessage =
                   msg.payload.headers
                     ?.find((info) => info.name.includes("From"))
-                    .value.includes("do-not-reply@mail.investors.com") &&
-                  text.length > 0 &&
+                    .value.search("do-not-reply@mail.investors.com") &&
                   [
                     "joins",
                     "increasing",
                     "raised",
                     "adding",
                     "moves to",
-                    "Moves To",
                     "rejoins",
                   ].some((word) =>
                     title.toLowerCase().includes(word.toLowerCase())
@@ -135,22 +132,15 @@ function checkNewEmails(auth) {
                 var url2 =
                   msg.snippet &&
                   `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=466616096&text=${customMessage}`;
-                if (isSendMessage) {
-                  await markMessageAsRead(auth, messages[0].id).then(
-                    async () => {
-                      await axios.post(url, {
-                        data: {
-                          parse_mode: "HTML",
-                        },
-                      });
-                      await axios.post(url2, {
-                        data: {
-                          parse_mode: "HTML",
-                        },
-                      });
-                    }
-                  );
-                }
+                await markMessageAsRead(auth, messages[0].id).then(async () => {
+                  isSendMessage &&
+                    (await axios.post(url2, {
+                      data: {
+                        parse_mode: "HTML",
+                      },
+                    }));
+                  await axios.post(url2);
+                });
               }
             }
           );
