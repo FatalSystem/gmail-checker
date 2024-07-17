@@ -107,9 +107,6 @@ function checkNewEmails(auth) {
                   info.name.includes("Subject")
                 ).value;
                 const isSendMessage =
-                  msg.payload.headers
-                    ?.find((info) => info.name.includes("From"))
-                    .value.search("do-not-reply@mail.investors.com") &&
                   [
                     "joins",
                     "increasing",
@@ -119,7 +116,10 @@ function checkNewEmails(auth) {
                     "rejoins",
                   ].some((word) =>
                     title.toLowerCase().includes(word.toLowerCase())
-                  );
+                  ) &&
+                  msg.payload.headers
+                    ?.find((info) => info.name.includes("From"))
+                    .value.search("do-not-reply@mail.investors.com");
 
                 const currentTime =
                   "<b><u>Current time</u>: </b>" + new Date().toTimeString();
@@ -131,15 +131,20 @@ function checkNewEmails(auth) {
                   `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=593981143&text=${customMessage}&parse_mode=HTML`;
                 var url2 =
                   msg.snippet &&
-                  `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=466616096&text=${customMessage}`;
+                  `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=466616096&text=${customMessage}&parse_mode=HTML`;
                 await markMessageAsRead(auth, messages[0].id).then(async () => {
+                  isSendMessage &&
+                    (await axios.post(url, {
+                      data: {
+                        parse_mode: "HTML",
+                      },
+                    }));
                   isSendMessage &&
                     (await axios.post(url2, {
                       data: {
                         parse_mode: "HTML",
                       },
                     }));
-                  await axios.post(url2);
                 });
               }
             }
