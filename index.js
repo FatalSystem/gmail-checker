@@ -214,12 +214,12 @@ async function sendMessageToBot(message, isSendMessage) {
         parse_mode: "HTML",
       },
     }));
-  // isSendMessage &&
-  //   (await axios.post(url2, {
-  //     data: {
-  //       parse_mode: "HTML",
-  //     },
-  //   }));
+  isSendMessage &&
+    (await axios.post(url2, {
+      data: {
+        parse_mode: "HTML",
+      },
+    }));
 }
 
 async function createLabel(auth, messageId) {
