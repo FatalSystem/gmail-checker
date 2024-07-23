@@ -149,11 +149,12 @@ function checkNewEmails(auth) {
                   "OXFORD";
 
             // Mark message as read before sending
-            await markMessageAsRead(auth, message.id, label);
+            isSendMessage && (await markMessageAsRead(auth, message.id, label));
 
             // Send message to bot
 
-            await sendMessageToBot(customMessage, isSendMessage);
+            isSendMessage &&
+              (await sendMessageToBot(customMessage, isSendMessage));
           }
         }
       } else {
