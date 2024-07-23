@@ -137,15 +137,7 @@ function checkNewEmails(auth) {
             const currentTitle = "<b><u>Title</u>: </b>" + title;
             const customMessage =
               "📈 LEADERBOARD %0A" + currentTitle + "%0A" + currentTime;
-            const label =
-              msg.payload.headers
-                ?.find((info) => info.name.includes("From"))
-                ?.value.search("do-not-reply@mail.investors.com") !== -1
-                ? "LEADERBOARD"
-                : msg.payload.headers
-                    ?.find((info) => info.name.includes("From"))
-                    ?.value.search("oxford@mail.oxfordclub.com") !== -1 &&
-                  "OXFORD";
+            const label = "LEADERBOARD";
 
             // Mark message as read before sending
             isSendMessage && (await markMessageAsRead(auth, message.id, label));
