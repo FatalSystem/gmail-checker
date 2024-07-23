@@ -93,7 +93,6 @@ function checkNewEmails(auth) {
   const gmail = google.gmail({ version: "v1", auth });
 
   setInterval(async () => {
-    if (isProcessing) return; // Prevent overlapping intervals
     isProcessing = true; // Mark as processing
 
     try {
@@ -182,8 +181,6 @@ async function markMessageAsRead(auth, messageId, label) {
       userId: "me",
     });
     const labels = labelsRes.data.labels;
-    console.log("Labels:", labels);
-    console.log("Label created:", labelsRes.data);
     const labelId = labels.find((_label) => _label.name === label).id;
     const response = gmail.users.messages.modify({
       userId: "me",
